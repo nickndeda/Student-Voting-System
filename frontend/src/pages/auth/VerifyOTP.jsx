@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function VerifyOTP() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(60);
-
+  
 useEffect(() => {
   if (countdown === 0) return;
 
@@ -29,6 +30,7 @@ useEffect(() => {
       document.getElementById(`otp-${index + 1}`).focus();
     }
   };
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ useEffect(() => {
 
     console.log("OTP Submitted:", otpCode);
 
-    // Navigate to student dashboard later
+    navigate("/student");
   };
 
   return (
