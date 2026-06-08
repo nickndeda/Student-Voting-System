@@ -65,24 +65,6 @@ useEffect(() => {
           one-time password sent to your registered phone number and email.
         </p>
 
-        <div className="mt-12 space-y-4">
-
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span>Two-Factor Authentication</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span>Secure Access Control</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-            <span>Protected Elections</span>
-          </div>
-
-        </div>
 
       </div>
 
