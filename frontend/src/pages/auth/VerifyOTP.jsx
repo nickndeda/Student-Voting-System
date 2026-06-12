@@ -1,23 +1,31 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 function VerifyOTP() {
+  const { registrationNumber, verifyOtp } = useAuth();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [countdown, setCountdown] = useState(60);
-  
-useEffect(() => {
-  if (countdown === 0) return;
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const timer = setTimeout(() => {
-    setCountdown((prev) => prev - 1);
-  }, 1000);
+  useEffect(() => {
+    if (countdown === 0) return;
 
-  return () => clearTimeout(timer);
-}, [countdown]);
+    const timer = setTimeout(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
 
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  useEffect(() => {
+    if (!registrationNumber) {
+      navigate("/");
+    }
+  }, [registrationNumber, navigate]);
 
   const handleChange = (value, index) => {
     if (!/^\d*$/.test(value)) return;
@@ -30,16 +38,27 @@ useEffect(() => {
       document.getElementById(`otp-${index + 1}`).focus();
     }
   };
-  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
     const otpCode = otp.join("");
 
-    console.log("OTP Submitted:", otpCode);
-
-    navigate("/student");
+    try {
+      const response = await verifyOtp(otpCode);
+      if (response.success) {
+        navigate("/student");
+      } else {
+        setError(response.message || "Invalid or expired OTP. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("OTP verification failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -95,10 +114,12 @@ useEffect(() => {
             Enter the 6-digit code sent to your registered phone number and institutional email.
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 space-y-8"
-          >
+          <form onSubmit={handleSubmit} className="mt-8 space-y-8">
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             {/* OTP BOXES */}
             <div className="flex justify-between gap-3">
@@ -123,9 +144,10 @@ useEffect(() => {
 
             <button
               type="submit"
-              className="w-full bg-[#800020] hover:bg-[#650019] text-white py-4 rounded-xl font-semibold transition-all"
+              disabled={submitting}
+              className="w-full bg-[#800020] hover:bg-[#650019] text-white py-4 rounded-xl font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Verify OTP
+              {submitting ? "Verifying..." : "Verify OTP"}
             </button>
 
             {/* RESEND */}

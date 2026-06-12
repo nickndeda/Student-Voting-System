@@ -1,17 +1,35 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import useAuth from "../../hooks/useAuth";
 
 function Login() {
   const navigate = useNavigate();
-
+  const { login } = useAuth();
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
-    // Backend authentication will be connected later
-    navigate("/verify-otp");
+    try {
+      const response = await login({ registrationNumber, password });
+      if (response.success) {
+        navigate("/verify-otp");
+      } else {
+        setError(response.message || "Unable to sign in. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Unable to sign in. Please check your credentials and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -87,12 +105,12 @@ function Login() {
             Sign in using your student portal credentials
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-
-            {/* Registration Number */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-3">
@@ -100,6 +118,8 @@ function Login() {
               </label>
 
               <input
+                value={registrationNumber}
+                onChange={(e) => setRegistrationNumber(e.target.value)}
                 type="text"
                 placeholder="Enter your registration number"
                 className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#800020] focus:border-transparent"
@@ -117,6 +137,8 @@ function Login() {
               <div className="relative">
 
                 <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#800020] focus:border-transparent"
@@ -138,9 +160,10 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full bg-[#800020] hover:bg-[#650019] text-white py-4 rounded-xl font-semibold transition duration-300 shadow-md"
+              disabled={submitting}
+              className="w-full bg-[#800020] hover:bg-[#650019] text-white py-4 rounded-xl font-semibold transition duration-300 shadow-md disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Continue
+              {submitting ? "Signing in..." : "Continue"}
             </button>
 
             {/* Forgot Password */}
