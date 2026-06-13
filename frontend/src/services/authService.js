@@ -42,6 +42,7 @@ export const getUser = () => {
   if (!raw) return null;
   try {
     return JSON.parse(raw);
+  // eslint-disable-next-line no-unused-vars
   } catch (error) {
     return null;
   }
@@ -58,6 +59,11 @@ export const logout = () => {
 
 export const fetchCurrentUser = async () => {
   const response = await api.get("/auth/me");
+  return response.data;
+};
+
+export const getStudentStatus = async () => {
+  const response = await api.get("/auth/status");
   return response.data;
 };
 

@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         authService.saveUser(data.user);
         setTokenState(data.token);
         setUserState(data.user);
+        localStorage.setItem("has_voted", data.user.has_voted ? "1" : "0");
       }
 
       return data;
@@ -77,6 +78,7 @@ export const AuthProvider = ({ children }) => {
     setTokenState(null);
     setUserState(null);
     setRegistrationNumber(null);
+    localStorage.removeItem("has_voted");
   };
 
   const value = useMemo(

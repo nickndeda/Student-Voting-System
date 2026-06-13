@@ -1,8 +1,9 @@
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { findStudentByRegNo } = require("../models/Student");
+const db = require("../config/db");
+const { findStudentByRegNo, findStudentById } = require("../models/Student");
 const { saveOtp, findValidOtp, markOtpUsed } = require("../models/OTP");
 const sendOtpEmail = require("../utils/sendEmail");
+const { comparePassword, isValidBcryptHash } = require("../utils/password");
 
 const login = async (req, res) => {
   try {
@@ -27,7 +28,18 @@ const login = async (req, res) => {
       });
     }
 
-    const passwordMatch = await bcrypt.compare(password, student.password_hash);
+    if (!isValidBcryptHash(student.password_hash)) {
+      console.error(
+        `Invalid password hash stored for registration number ${student.registration_number}`
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Stored password is invalid. Please ask an administrator to reset it.",
+      });
+    }
+
+    const passwordMatch = await comparePassword(password, student.password_hash);
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -109,6 +121,9 @@ const verifyOtp = async (req, res) => {
       user: {
         studentId: student.student_id,
         registrationNumber: student.registration_number,
+        first_name: student.first_name,
+        last_name: student.last_name,
+        has_voted: student.has_voted,
       },
     });
   } catch (error) {
@@ -128,14 +143,65 @@ const me = async (req, res) => {
     });
   }
 
-  return res.status(200).json({
-    success: true,
-    user: req.user,
-  });
+  try {
+    const student = await findStudentById(req.user.studentId);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: student,
+    });
+  } catch (error) {
+    console.error("me error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+const getStudentStatus = (req, res) => {
+  const studentId = req.user.studentId;
+
+  db.query(
+    `
+    SELECT has_voted, voted_at
+    FROM students
+    WHERE student_id = ?
+    `,
+    [studentId],
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Server error",
+        });
+      }
+
+      if (!results.length) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        has_voted: results[0].has_voted,
+        voted_at: results[0].voted_at || null,
+      });
+    }
+  );
 };
 
 module.exports = {
   login,
   verifyOtp,
   me,
+  getStudentStatus,
 };
