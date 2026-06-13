@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import { getReceipt } from "../../services/voteService";
 
 function Receipt() {
+  const navigate = useNavigate();
   const [receipt, setReceipt] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -141,6 +143,16 @@ function Receipt() {
           className="mt-6 bg-[#800020] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#650019]"
         >
           Download Receipt
+        </button>
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 w-full flex justify-end"
+        >
+          <span className="flex items-center gap-2 px-6 py-3 bg-slate-200 text-slate-800 rounded-xl font-semibold hover:bg-slate-300 transition-colors">
+            ← Back
+          </span>
         </button>
       </div>
     </div>

@@ -1,33 +1,38 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import { getCurrentStudent } from "../../services/studentService";
 import useAuth from "../../hooks/useAuth";
 
 function StudentDashboard() {
-  const { logout } = useAuth();
-  const [student, setStudent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { logout, user: student, initializing } = useAuth();
+  const [loading] = useState(false);
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const data = await getCurrentStudent();
-        setStudent(data.user);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudent();
-  }, []);
+  if (initializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#800020]"></div>
+          <p className="mt-4 text-slate-600 font-medium">Loading Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     logout();
     window.location.href = "/";
   };
+
+  if (!student) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <p className="text-slate-600 font-medium">Unable to load student data</p>
+        </div>
+      </div>
+    );
+  }
+
 
   if (loading) {
     return (

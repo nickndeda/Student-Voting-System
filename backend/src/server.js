@@ -6,6 +6,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const candidateRoutes = require("./routes/candidateRoutes");
 const voteRoutes = require("./routes/voteRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
 
 const app = express();
 
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/votes", voteRoutes);
+app.use("/api/complaints", complaintRoutes);
 
 app.use("/api/candidates", candidateRoutes);
 app.use("/api/auth", authRoutes);

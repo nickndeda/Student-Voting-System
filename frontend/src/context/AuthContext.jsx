@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUserState] = useState(authService.getUser());
   const [registrationNumber, setRegistrationNumber] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const storedToken = authService.getToken();
@@ -27,7 +28,12 @@ export const AuthProvider = ({ children }) => {
           authService.logout();
           setTokenState(null);
           setUserState(null);
+        })
+        .finally(() => {
+          setInitializing(false);
         });
+    } else {
+      setInitializing(false);
     }
   }, []);
 
@@ -87,13 +93,14 @@ export const AuthProvider = ({ children }) => {
       user,
       registrationNumber,
       loading,
+      initializing,
       login,
       verifyOtp,
       logout,
       isAuthenticated: Boolean(token),
       setRegistrationNumber,
     }),
-    [token, user, registrationNumber, loading]
+    [token, user, registrationNumber, loading, initializing]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

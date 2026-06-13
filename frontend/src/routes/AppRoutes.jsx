@@ -7,6 +7,8 @@ import VoteGuard from "../components/shared/VoteGuard";
 import VotePage from "../pages/student/VotePage";
 import ReviewVotes from "../pages/student/ReviewVotes";
 import Receipt from "../pages/student/Receipt";
+import Complaint from "../pages/student/Complaint";
+import Candidates from "../pages/student/CandidatesPage";
 
 function AppRoutes() {
   return (
@@ -24,7 +26,16 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="/student/receipt" element={<Receipt />}/>
+        <Route path="/student/candidates" element={<Candidates />} />
+        <Route path="/student/receipt" element={<Receipt />} />
+        <Route
+          path="/student/complaint"
+          element={
+            <ProtectedRoute>
+              <Complaint />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/student"
           element={
@@ -32,14 +43,13 @@ function AppRoutes() {
               <StudentDashboard />
             </ProtectedRoute>
           }
-
         />
         <Route
           path="/student/vote"
           element={
             <ProtectedRoute>
               <VoteGuard>
-              <VotePage />
+                <VotePage />
               </VoteGuard>
             </ProtectedRoute>
           }
